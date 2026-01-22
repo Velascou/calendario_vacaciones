@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Vacaciones (ratio por horas) 2025–2030</title>
+  <style>
+    :root{
+      --bg:#0b1220;
+      --muted:#9fb0d0;
+      --text:#e8f0ff;
+      --border:rgba(255,255,255,.10);
+      --accent:#6aa9ff;
+      --ok:#40d18a;
+      --danger:#ff6a6a;
+      --disabled:#2a3550;
+      --vac:#1f7aff;
+      --ph:#ffb020;
+      --worked:#b575ff;
+      --bonus:#40d18a;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(1200px 600px at 20% 0%, rgba(106,169,255,.15), transparent 60%),
+        radial-gradient(900px 600px at 100% 50%, rgba(64,209,138,.10), transparent 55%),
+        var(--bg);
+      color:var(--text);
+      padding:24px;
+    }
+    header{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+    h1{margin:0;font-size:22px;letter-spacing:.2px;}
+    .sub{color:var(--muted);font-size:14px;line-height:1.4;}
+
+    .layout{
+      display:grid;
+      grid-template-columns: 500px 1fr;
+      gap:16px;
+      align-items:start;
+    }
+
+    .panel, .calendarWrap{
+      background: rgba(17,26,47,.85);
+      border:1px solid var(--border);
+      border-radius:16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+      backdrop-filter: blur(6px);
+    }
+
+    .panel{
+      padding:16px;
+      position:sticky;
+      top:16px;
+    }
+
+    .sectionTitle{
+      font-size:14px;color:var(--muted);
+      margin:0 0 8px 0;
+      letter-spacing:.3px;text-transform:uppercase;
+    }
+
+    label{
+      display:flex;flex-direction:column;gap:6px;
+      font-size:13px;color:var(--muted);
+    }
+
+    input, select, button{font: inherit;}
+    input, select{
+      background:#0f1730;
+      border:1px solid var(--border);
+      color:var(--text);
+      padding:10px 10px;
+      border-radius:12px;
+      outline:none;
+    }
+    input:focus, select:focus{
+      border-color: rgba(106,169,255,.55);
+      box-shadow: 0 0 0 3px rgba(106,169,255,.15);
+    }
+
+    .grid{display:grid;grid-template-columns: 1fr 1fr;gap:10px;}
+    .grid .full{grid-column: 1 / -1;}
+
+    .mini{
+      font-size:12px;
+      color:rgba(232,240,255,.70);
+      margin-top:6px;
+      line-height:1.35;
+    }
+
+    .stats{
+      margin-top:12px;padding:12px;
+      border:1px solid var(--border);
+      border-radius:14px;
+      background: rgba(10,16,35,.55);
+      display:grid;gap:8px;
+    }
+    .statRow{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:14px;}
+    .statRow small{color:var(--muted);font-size:12px;}
+    .statValue{font-weight:700;}
+
+    .legend{
+      margin-top:12px;display:flex;flex-wrap:wrap;gap:8px;
+      color:var(--muted);font-size:12px;
+    }
+    .pill{
+      display:flex;align-items:center;gap:6px;
+      padding:6px 8px;border:1px solid var(--border);
+      border-radius:999px;background: rgba(10,16,35,.45);
+    }
+    .dot{width:10px;height:10px;border-radius:50%;}
+
+    .actions{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;}
+    button{
+      border:1px solid var(--border);
+      background:#0f1730;color:var(--text);
+      padding:10px 12px;border-radius:12px;cursor:pointer;
+    }
+    button:hover{border-color: rgba(255,255,255,.20);transform: translateY(-1px);}
+    button.primary{
+      background: linear-gradient(180deg, rgba(106,169,255,.22), rgba(106,169,255,.08));
+      border-color: rgba(106,169,255,.35);
+    }
+    button.warn{
+      background: linear-gradient(180deg, rgba(255,176,32,.20), rgba(255,176,32,.06));
+      border-color: rgba(255,176,32,.35);
+    }
+    button.danger{
+      background: linear-gradient(180deg, rgba(255,106,106,.22), rgba(255,106,106,.08));
+      border-color: rgba(255,106,106,.35);
+    }
+    button.ghost{
+      background: rgba(15,23,48,.45);
+      border-color: rgba(255,255,255,.12);
+    }
+
+    .calendarWrap{padding:16px;}
+
+    .months{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(260px, 1fr));
+      gap:12px;
+    }
+
+    .month{
+      border:1px solid var(--border);
+      border-radius:16px;
+      overflow:hidden;
+      background: rgba(10,16,35,.45);
+    }
+    .monthHeader{
+      padding:10px 12px;display:flex;justify-content:space-between;align-items:center;
+      border-bottom:1px solid var(--border);
+      background: rgba(17,26,47,.6);
+    }
+    .monthHeader b{font-size:14px;}
+    .monthHeader span{color:var(--muted);font-size:12px;}
+
+    .dow{
+      display:grid;
+      grid-template-columns: repeat(7, 1fr) 110px;
+      padding:8px 10px 0 10px;
+      gap:6px;
+      color:var(--muted);
+      font-size:11px;
+      letter-spacing:.3px;
+      align-items:center;
+    }
+    .dow .wkLabel{
+      text-align:center;
+      opacity:.9;
+      font-size:10px;
+    }
+
+    .days{
+      display:grid;
+      grid-template-columns: repeat(7, 1fr) 110px;
+      padding:8px 10px 10px 10px;
+      gap:6px;
+      align-items:stretch;
+    }
+
+    .day{
+      height:34px;border-radius:10px;border:1px solid var(--border);
+      background: rgba(15,23,48,.6);
+      display:flex;align-items:center;justify-content:center;
+      font-size:12px;user-select:none;cursor:pointer;
+      position:relative;
+    }
+    .day:hover{border-color: rgba(255,255,255,.18);}
+    .day.out{opacity:.25;cursor:default;}
+    .day.weekend{background: rgba(15,23,48,.35);}
+
+    .day.vac{
+      background: rgba(31,122,255,.35);
+      border-color: rgba(31,122,255,.55);
+      font-weight:700;
+    }
+    .day.disabled{
+      background: rgba(42,53,80,.75);
+      border-color: rgba(255,255,255,.10);
+      color: rgba(232,240,255,.45);
+      text-decoration: line-through;
+    }
+    .day.ph{
+      background: rgba(255,176,32,.28);
+      border-color: rgba(255,176,32,.55);
+      font-weight:700;
+    }
+    .day.workedph{
+      background: rgba(181,117,255,.22);
+      border-color: rgba(181,117,255,.55);
+      font-weight:800;
+    }
+    .day.birthday{
+      outline: 2px solid rgba(64,209,138,.55);
+      box-shadow: 0 0 0 3px rgba(64,209,138,.12);
+    }
+    .day.marker{
+      outline: 2px solid rgba(64,209,138,.55);
+      box-shadow: 0 0 0 3px rgba(64,209,138,.12);
+    }
+
+    .weekBox{
+      height:34px;
+      border-radius:10px;
+      border:1px dashed rgba(255,255,255,.16);
+      background: rgba(10,16,35,.35);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color: rgba(232,240,255,.75);
+      font-size:11px;
+      padding:0 6px;
+    }
+    .weekBox input{
+      width:100%;
+      height:26px;
+      border-radius:8px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(15,23,48,.45);
+      color: rgba(232,240,255,.85);
+      font-size:11px;
+      padding:0 6px;
+      text-align:center;
+      outline:none;
+    }
+    .weekBox input[readonly]{cursor:default;}
+
+    .hint{
+      margin-top:10px;color:var(--muted);
+      font-size:12px;line-height:1.35;
+    }
+
+    @media (max-width: 1250px){
+      .layout{ grid-template-columns: 1fr; }
+      .panel{ position:relative; top:auto; }
+      .months{ grid-template-columns: repeat(2, minmax(260px, 1fr)); }
+    }
+    @media (max-width: 740px){
+      .months{ grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Calendario Vacaciones (2025–2030) · Ratio por horas · 38h/semana</h1>
+  <div class="sub">
+    Modelo correcto: <b>(Horas trabajadas × ratio / 7.6h)</b> + carryover + TIL + cumpleaños − vacaciones tomadas.
+    Los cuadros de semana muestran <b>DISPONIBLES</b> al domingo.
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="panel">
+    <p class="sectionTitle">Parámetros</p>
+
+    <div class="grid">
+      <label>
+        Año
+        <select id="year"></select>
+      </label>
+
+      <label>
+        Fecha de cálculo (hasta)
+        <input id="cutoff" type="date"/>
+      </label>
+
+      <label class="full">
+        Inicio de contrato / empresa
+        <input id="contractStart" type="date"/>
+      </label>
+
+      <label>
+        Horas semanales (L-V)
+        <input id="weeklyHours" type="number" step="0.1" min="0" value="38"/>
+        <div class="mini">Tu caso: 38h/semana. El programa calcula <b>7.6h/día</b> automáticamente (si 5 días).</div>
+      </label>
+
+      <label>
+        Días/semana (L-V fijo)
+        <input id="workDaysPerWeek" type="number" step="1" min="1" max="7" value="5"/>
+        <div class="mini">Tu jornada: Lunes a Viernes (5). Si pones 5, el patrón laboral será siempre L-V.</div>
+      </label>
+
+      <label>
+        Horas diarias (auto)
+        <input id="dailyHours" type="number" step="0.1" min="0" value="7.6"/>
+        <div class="mini">Cada día de vacaciones gastado = <b>7.6h</b> (en tu caso).</div>
+      </label>
+
+      <label>
+        % Jornada (FTE)
+        <input id="fte" type="number" step="1" min="0" max="100" value="100"/>
+      </label>
+
+      <label>
+        Ratio acumulación (ej: 0.08)
+        <input id="accrualRate" type="number" step="0.0001" min="0" value="0.08"/>
+        <div class="mini">
+          Annual leave generado en horas = <b>Horas trabajadas × ratio</b>.<br/>
+          Si quieres aproximarlo a 22 días + cumpleaños, pulsa “Calcular ratio”.
+        </div>
+      </label>
+
+      <label>
+        Objetivo días/año (empresa)
+        <input id="targetDaysPerYear" type="number" step="0.5" min="0" value="23"/>
+        <div class="mini">Tu caso: 22 + 1 cumpleaños = 23 días.</div>
+      </label>
+
+      <label>
+        Multiplicador (%)
+        <input id="accrualPct" type="number" step="1" min="0" max="200" value="100"/>
+      </label>
+
+      <label>
+        Carryover (días)
+        <input id="carryoverDays" type="number" step="0.5" min="0" value="0"/>
+      </label>
+
+      <label class="full">
+        Cumpleaños (para día extra)
+        <input id="birthday" type="date"/>
+      </label>
+
+      <label>
+        Añadir día cumpleaños
+        <select id="enableBirthday">
+          <option value="yes" selected>Sí (+1 día)</option>
+          <option value="no">No</option>
+        </select>
+      </label>
+
+      <label>
+        Modo de edición
+        <select id="mode">
+          <option value="vacation" selected>Marcar vacaciones</option>
+          <option value="disabled">Habilitar/Deshabilitar día</option>
+          <option value="publicHoliday">Editar Bank Holiday</option>
+          <option value="workedPH">Trabajé el Bank Holiday (genera TIL)</option>
+        </select>
+      </label>
+
+      <label>
+        Contar fines de semana
+        <select id="countWeekends">
+          <option value="no" selected>No</option>
+          <option value="yes">Sí</option>
+        </select>
+        <div class="mini">
+          Recomendado: <b>No</b> (porque tu jornada es L-V). Si trabajases turnos, podrías activar “Sí”.
+        </div>
+      </label>
+
+      <label class="full">
+        Regla TIL por trabajar PH
+        <div class="mini">
+          • PH trabajado en día laborable: <b>+3.0 días</b><br/>
+          • PH trabajado en fin de semana: <b>+1.5 días</b>
+        </div>
+      </label>
+    </div>
+
+    <div class="actions">
+      <button class="ghost" id="calcRatioBtn">Calcular ratio desde “días/año”</button>
+    </div>
+
+    <div class="stats">
+      <div class="statRow">
+        <span>Horas trabajadas (estimadas)</span>
+        <span class="statValue" id="workedHours">—</span>
+      </div>
+
+      <div class="statRow">
+        <span>AL generado (hasta fecha)</span>
+        <span class="statValue" id="genDays">—</span>
+      </div>
+      <div class="statRow">
+        <small>en horas</small>
+        <span class="statValue" id="genHours">—</span>
+      </div>
+
+      <div class="statRow">
+        <span>Tomadas (hasta fecha)</span>
+        <span class="statValue" id="takenDays">—</span>
+      </div>
+      <div class="statRow">
+        <small>en horas</small>
+        <span class="statValue" id="takenHours">—</span>
+      </div>
+
+      <div class="statRow">
+        <span>TIL por PH trabajado</span>
+        <span class="statValue" id="tilDays">—</span>
+      </div>
+
+      <div class="statRow">
+        <span>Bonus cumpleaños</span>
+        <span class="statValue" id="bdayBonus">—</span>
+      </div>
+
+      <hr style="border:0;border-top:1px solid rgba(255,255,255,.10);width:100%;opacity:.7"/>
+
+      <div class="statRow">
+        <span>Disponibles</span>
+        <span class="statValue" id="availDays">—</span>
+      </div>
+      <div class="statRow">
+        <small>en horas</small>
+        <span class="statValue" id="availHours">—</span>
+      </div>
+    </div>
+
+    <div class="legend">
+      <span class="pill"><span class="dot" style="background: var(--vac)"></span>Vacación</span>
+      <span class="pill"><span class="dot" style="background: var(--ph)"></span>Bank Holiday</span>
+      <span class="pill"><span class="dot" style="background: var(--worked)"></span>Trabajado (TIL)</span>
+      <span class="pill"><span class="dot" style="background: var(--disabled)"></span>Deshabilitado</span>
+      <span class="pill"><span class="dot" style="background: var(--bonus)"></span>Cumpleaños</span>
+    </div>
+
+    <div class="actions">
+      <button class="primary" id="exportLeaveICS">Exportar Annual Leave (.ics)</button>
+      <button class="warn" id="exportPHICS">Exportar Bank Holidays (.ics)</button>
+      <button id="exportJSON">Exportar JSON</button>
+      <button id="importJSON">Importar JSON</button>
+      <button class="danger" id="resetBtn">Reset</button>
+    </div>
+
+    <div class="hint">
+      ✅ Cuadros semanales = <b>Disponibles al domingo</b> (ya restando vacaciones tomadas).<br/>
+      ✅ Días deshabilitados = no trabajados, pero no gastan AL.<br/>
+      ✅ Si marcas “Trabajé PH” suma TIL según regla (+3 / +1.5).
+    </div>
+  </aside>
+
+  <main class="calendarWrap">
+    <div class="months" id="months"></div>
+  </main>
+</div>
+
+<script>
+  // ===========================
+  // Persistencia / Estado
+  // ===========================
+  const STORAGE_KEY = "vacaciones-state-hour-ratio-v2";
+
+  const state = {
+    year: 2026,
+    vacation: {},        // per year: Set(ISO)
+    disabled: {},        // per year: Set(ISO)
+    publicHolidays: {},  // per year: Set(ISO)
+    workedPH: {},        // per year: Set(ISO)
+    settings: {
+      cutoff: "2026-01-21",
+      contractStart: "2025-11-24",
+      weeklyHours: 38,
+      workDaysPerWeek: 5,
+      dailyHours: 7.6,
+      fte: 100,
+      accrualRate: 0.08,
+      targetDaysPerYear: 23,
+      accrualPct: 100,
+      carryoverDays: 0,
+      birthday: "1999-01-01",
+      enableBirthday: "yes",
+      mode: "vacation",
+      countWeekends: "no",
+    }
+  };
+
+  const monthNames = [
+    "Enero","Febrero","Marzo","Abril","Mayo","Junio",
+    "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"
+  ];
+  const dowNames = ["L","M","X","J","V","S","D"];
+
+  const pad2 = (n) => String(n).padStart(2,"0");
+  const toISO = (d) => `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+  const parseISO = (s) => {
+    const [y,m,dd] = s.split("-").map(Number);
+    return new Date(y, m-1, dd);
+  };
+  const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+
+  function isWeekend(date){
+    const d = date.getDay(); // 0 dom ... 6 sáb
+    return d === 0 || d === 6;
+  }
+
+  function getYearSet(map, year){
+    if(!map[String(year)]) map[String(year)] = new Set();
+    return map[String(year)];
+  }
+
+  function saveState(){
+    const pack = (m) => Object.fromEntries(
+      Object.entries(m).map(([y,set]) => [y, Array.from(set)])
+    );
+    const payload = {
+      year: state.year,
+      vacation: pack(state.vacation),
+      disabled: pack(state.disabled),
+      publicHolidays: pack(state.publicHolidays),
+      workedPH: pack(state.workedPH),
+      settings: state.settings
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+  }
+
+  function loadState(){
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return;
+    try{
+      const parsed = JSON.parse(raw);
+      const unpack = (m) => {
+        const out = {};
+        for(const [y, arr] of Object.entries(m ?? {})){
+          out[y] = new Set(arr ?? []);
+        }
+        return out;
+      };
+      state.year = parsed.year ?? 2026;
+      state.vacation = unpack(parsed.vacation);
+      state.disabled = unpack(parsed.disabled);
+      state.publicHolidays = unpack(parsed.publicHolidays);
+      state.workedPH = unpack(parsed.workedPH);
+      state.settings = { ...state.settings, ...(parsed.settings ?? {}) };
+    }catch(e){
+      console.warn("No se pudo cargar estado:", e);
+    }
+  }
+
+  // ===========================
+  // Bank Holidays Irlanda (default)
+  // ===========================
+  function firstMonday(year, monthIndex){
+    const d = new Date(year, monthIndex, 1);
+    const js = d.getDay(); // 0..6
+    const offset = (js === 0) ? 1 : (8 - js);
+    return new Date(year, monthIndex, 1 + (offset % 7));
+  }
+  function lastMonday(year, monthIndex){
+    const last = new Date(year, monthIndex+1, 0);
+    const js = last.getDay();
+    const offset = (js >= 1) ? (js - 1) : 6;
+    return new Date(year, monthIndex, last.getDate() - offset);
+  }
+  function easterSunday(year){
+    const a = year % 19;
+    const b = Math.floor(year / 100);
+    const c = year % 100;
+    const d = Math.floor(b / 4);
+    const e = b % 4;
+    const f = Math.floor((b + 8) / 25);
+    const g = Math.floor((b - f + 1) / 3);
+    const h = (19*a + b - d - g + 15) % 30;
+    const i = Math.floor(c / 4);
+    const k = c % 4;
+    const l = (32 + 2*e + 2*i - h - k) % 7;
+    const m = Math.floor((a + 11*h + 22*l) / 451);
+    const month = Math.floor((h + l - 7*m + 114) / 31);
+    const day = ((h + l - 7*m + 114) % 31) + 1;
+    return new Date(year, month-1, day);
+  }
+  function normalizeObserved(dates){
+    const out = [];
+    const used = new Set();
+    for(const date of dates){
+      let d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      while(d.getDay() === 0 || d.getDay() === 6){
+        const add = (d.getDay() === 6) ? 2 : 1;
+        d = new Date(d.getFullYear(), d.getMonth(), d.getDate() + add);
+      }
+      let iso = toISO(d);
+      while(used.has(iso)){
+        d = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
+        iso = toISO(d);
+      }
+      used.add(iso);
+      out.push(d);
+    }
+    return out;
+  }
+  function defaultIrishPublicHolidays(year){
+    let brigids;
+    const feb1 = new Date(year, 1, 1);
+    if(feb1.getDay() === 5){
+      brigids = feb1;
+    }else{
+      brigids = firstMonday(year, 1);
+    }
+
+    const easter = easterSunday(year);
+    const easterMon = new Date(easter.getFullYear(), easter.getMonth(), easter.getDate() + 1);
+
+    const raw = [
+      new Date(year, 0, 1),
+      brigids,
+      new Date(year, 2, 17),
+      easterMon,
+      firstMonday(year, 4),
+      firstMonday(year, 5),
+      firstMonday(year, 7),
+      lastMonday(year, 9),
+      new Date(year, 11, 25),
+      new Date(year, 11, 26),
+    ];
+    return normalizeObserved(raw);
+  }
+  function ensurePublicHolidaysForYear(year){
+    const set = getYearSet(state.publicHolidays, year);
+    if(set.size > 0) return;
+    defaultIrishPublicHolidays(year).map(toISO).forEach(x=>set.add(x));
+  }
+
+  // ===========================
+  // Jornada laboral y rangos
+  // ===========================
+  // Patrón por defecto (para tu caso):
+  //   - Si workDaysPerWeek = 5 => L-V laborable siempre
+  //   - Si workDaysPerWeek = 4 => L-J
+  //   - etc (primeros N días desde lunes)
+  //
+  // countWeekends:
+  //   - Si no, ignora sábado y domingo.
+  function isScheduledWorkday(date){
+    const n = clamp(Number(state.settings.workDaysPerWeek)||5,1,7);
+    const countWeekends = state.settings.countWeekends === "yes";
+
+    const js = date.getDay(); // 0 Sun
+    const mon0 = (js === 0) ? 6 : (js - 1); // Mon=0..Sun=6
+
+    // Si no contamos fines y es finde -> no laborable
+    if(!countWeekends && (js === 0 || js === 6)) return false;
+
+    // Primeros N días desde lunes
+    return mon0 < n;
+  }
+
+  function dateRangeInclusive(start, end){
+    const out = [];
+    const s = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+    const e = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+    for(let d=s; d<=e; d=new Date(d.getFullYear(), d.getMonth(), d.getDate()+1)){
+      out.push(new Date(d.getFullYear(), d.getMonth(), d.getDate()));
+    }
+    return out;
+  }
+
+  function accrualStartForYear(year){
+    const contractStart = parseISO(state.settings.contractStart);
+    const yearStart = new Date(year,0,1);
+    const yearEnd = new Date(year,11,31);
+    if(contractStart > yearEnd) return null;
+    return (contractStart > yearStart) ? contractStart : yearStart;
+  }
+
+  function birthdayInYear(year){
+    if(!state.settings.birthday) return null;
+    const b = parseISO(state.settings.birthday);
+    return new Date(year, b.getMonth(), b.getDate());
+  }
+
+  // ===========================
+  // Cálculos: EXACTO con tu fórmula
+  // ===========================
+  // - Horas trabajadas:
+  //    suma de días laborables * horasDiariasEfectivas
+  //    excluye: disabled, vacaciones, PH si NO trabajado
+  //
+  // - Generado (días):
+  //    (workedHours * ratio * mult) / horasDiariasEfectivas
+  //
+  // - Disponibles:
+  //    generado + carryover + til + bday - taken
+  //
+  // - taken (días):
+  //    1 día = 7.6h (o horasDiariasEfectivas) por día de vacaciones
+  //
+  function effectiveDailyHours(){
+    const daily = Number(state.settings.dailyHours) || 0;
+    const fte = clamp((Number(state.settings.fte)||0)/100, 0, 2);
+    return daily * fte;
+  }
+
+  function calcWorkedHoursUntil(date){
+    const year = state.year;
+    const start = accrualStartForYear(year);
+    if(!start) return 0;
+
+    const yearEnd = new Date(year,11,31);
+    const cutoff = (date > yearEnd) ? yearEnd : date;
+    if(cutoff < start) return 0;
+
+    const dis = getYearSet(state.disabled, year);
+    const vac = getYearSet(state.vacation, year);
+    const ph  = getYearSet(state.publicHolidays, year);
+    const workedPH = getYearSet(state.workedPH, year);
+
+    const eff = effectiveDailyHours();
+
+    let hours = 0;
+    const days = dateRangeInclusive(start, cutoff);
+
+    for(const d of days){
+      const iso = toISO(d);
+
+      if(dis.has(iso)) continue;
+      if(!isScheduledWorkday(d)) continue;
+
+      // vacaciones => no trabajado
+      if(vac.has(iso)) continue;
+
+      // PH NO trabajado => no trabajado
+      if(ph.has(iso) && !workedPH.has(iso)) continue;
+
+      hours += eff;
+    }
+    return hours;
+  }
+
+  function generatedDaysUntil(date){
+    const workedHours = calcWorkedHoursUntil(date);
+    const rate = Number(state.settings.accrualRate) || 0;
+    const mult = clamp((Number(state.settings.accrualPct)||100)/100, 0, 5);
+    const eff = effectiveDailyHours();
+
+    // (workedHours * rate) => horas de AL generadas
+    const alHours = workedHours * rate * mult;
+
+    // / horasDiarias => días generados
+    const genDays = (eff > 0) ? (alHours / eff) : 0;
+
+    return { workedHours, alHours, genDays };
+  }
+
+  function birthdayBonusUntil(cutoff){
+    if(state.settings.enableBirthday !== "yes") return 0;
+    const year = state.year;
+    const bday = birthdayInYear(year);
+    if(!bday) return 0;
+
+    const start = accrualStartForYear(year);
+    if(!start) return 0;
+
+    if(bday < start) return 0;
+    if(bday > cutoff) return 0;
+
+    return 1;
+  }
+
+  function tilCreditsUntil(cutoff){
+    const year = state.year;
+    const worked = getYearSet(state.workedPH, year);
+    const ph = getYearSet(state.publicHolidays, year);
+
+    let credits = 0;
+    for(const iso of worked){
+      const d = parseISO(iso);
+      if(d > cutoff) continue;
+      if(!ph.has(iso)) continue;
+      credits += isWeekend(d) ? 1.5 : 3;
+    }
+    return credits;
+  }
+
+  function takenDaysUntil(cutoff){
+    const year = state.year;
+    const vac = getYearSet(state.vacation, year);
+    const dis = getYearSet(state.disabled, year);
+    const ph  = getYearSet(state.publicHolidays, year);
+
+    let count = 0;
+    for(const iso of vac){
+      const d = parseISO(iso);
+      if(d > cutoff) continue;
+      if(dis.has(iso)) continue;
+
+      // Si cae en PH, por defecto NO consume annual leave (puedes quitar PH manualmente si quieres)
+      if(ph.has(iso)) continue;
+
+      // Solo si era laborable (L-V en tu caso)
+      if(!isScheduledWorkday(d)) continue;
+
+      count += 1;
+    }
+    return count;
+  }
+
+  function availableDaysUntil(cutoff){
+    const carry = Number(state.settings.carryoverDays)||0;
+    const til = tilCreditsUntil(cutoff);
+    const taken = takenDaysUntil(cutoff);
+    const bday = birthdayBonusUntil(cutoff);
+
+    const { genDays } = generatedDaysUntil(cutoff);
+
+    // ✅ Esto es lo correcto: disponibles = generadas + carry + til + bday - tomadas
+    return { genDays, carry, til, bday, taken, available: (genDays + carry + til + bday - taken) };
+  }
+
+  function updateStats(){
+    const cutoff = parseISO(state.settings.cutoff);
+    const eff = effectiveDailyHours();
+
+    const { workedHours, alHours, genDays } = generatedDaysUntil(cutoff);
+    const { carry, til, bday, taken, available } = availableDaysUntil(cutoff);
+
+    const fmt = (n) => (Math.round(n*100)/100).toFixed(2);
+
+    document.getElementById("workedHours").textContent = `${fmt(workedHours)} h`;
+
+    document.getElementById("genDays").textContent = `${fmt(genDays)} días`;
+    document.getElementById("genHours").textContent = `${fmt(alHours)} h`;
+
+    document.getElementById("takenDays").textContent = `${fmt(taken)} días`;
+    document.getElementById("takenHours").textContent = `${fmt(taken*eff)} h`;
+
+    document.getElementById("tilDays").textContent = `+${fmt(til)} días`;
+    document.getElementById("bdayBonus").textContent = `+${fmt(bday)} día`;
+
+    document.getElementById("availDays").textContent = `${fmt(available)} días`;
+    document.getElementById("availHours").textContent = `${fmt(available*eff)} h`;
+  }
+
+  // ===========================
+  // Render Calendario + cajas semanales (DISPONIBLES al domingo)
+  // ===========================
+  const monthsEl = document.getElementById("months");
+
+  function renderCalendar(){
+    monthsEl.innerHTML = "";
+    const year = state.year;
+
+    const vac = getYearSet(state.vacation, year);
+    const dis = getYearSet(state.disabled, year);
+    const ph  = getYearSet(state.publicHolidays, year);
+    const worked = getYearSet(state.workedPH, year);
+
+    const cutoffISO = state.settings.cutoff;
+    const bday = birthdayInYear(year);
+    const bdayISO = bday ? toISO(bday) : null;
+
+    for(let month=0; month<12; month++){
+      const monthCard = document.createElement("div");
+      monthCard.className = "month";
+
+      const header = document.createElement("div");
+      header.className = "monthHeader";
+      header.innerHTML = `<b>${monthNames[month]}</b><span>${year}</span>`;
+      monthCard.appendChild(header);
+
+      const dow = document.createElement("div");
+      dow.className = "dow";
+      dowNames.forEach(n=>{
+        const el = document.createElement("div");
+        el.textContent = n;
+        dow.appendChild(el);
+      });
+      const wk = document.createElement("div");
+      wk.className = "wkLabel";
+      wk.textContent = "Disp. (Dom)";
+      dow.appendChild(wk);
+
+      monthCard.appendChild(dow);
+
+      const grid = document.createElement("div");
+      grid.className = "days";
+
+      const first = new Date(year, month, 1);
+      const jsDay = first.getDay(); // 0..6
+      const isoDay = jsDay === 0 ? 7 : jsDay; // 1..7
+      const blanks = isoDay - 1;
+
+      const lastDay = new Date(year, month+1, 0).getDate();
+
+      const cells = [];
+      for(let i=0; i<blanks; i++) cells.push({ out:true, date:null });
+      for(let d=1; d<=lastDay; d++) cells.push({ out:false, date:new Date(year, month, d) });
+
+      while(cells.length % 7 !== 0) cells.push({ out:true, date:null });
+      while(cells.length < 42) cells.push({ out:true, date:null });
+
+      for(let row=0; row<cells.length/7; row++){
+        const rowCells = cells.slice(row*7, row*7+7);
+
+        rowCells.forEach(cell=>{
+          const el = document.createElement("div");
+          el.className = "day";
+
+          if(cell.out){
+            el.classList.add("out");
+            el.textContent = "";
+            grid.appendChild(el);
+            return;
+          }
+
+          const date = cell.date;
+          const iso = toISO(date);
+
+          el.textContent = date.getDate();
+
+          if(isWeekend(date)) el.classList.add("weekend");
+          if(ph.has(iso)) el.classList.add("ph");
+          if(vac.has(iso)) el.classList.add("vac");
+          if(dis.has(iso)) el.classList.add("disabled");
+          if(worked.has(iso)) el.classList.add("workedph");
+
+          if(iso === cutoffISO) el.classList.add("marker");
+          if(bdayISO && iso === bdayISO && state.settings.enableBirthday === "yes") el.classList.add("birthday");
+
+          el.addEventListener("click", ()=> handleDayClick(iso));
+
+          grid.appendChild(el);
+        });
+
+        // Caja semanal al lado: DISPONIBLES al domingo adyacente
+        let sundayDate = null;
+        const sundayCell = rowCells[6];
+
+        if(sundayCell && !sundayCell.out){
+          sundayDate = sundayCell.date;
+        }else{
+          // si domingo es out, tomamos el último día real de la fila y lo llevamos al domingo
+          let lastReal = null;
+          for(let i=6; i>=0; i--){
+            if(!rowCells[i].out){ lastReal = rowCells[i].date; break; }
+          }
+          if(lastReal){
+            const js = lastReal.getDay();
+            const add = (js === 0) ? 0 : (7 - js);
+            sundayDate = new Date(lastReal.getFullYear(), lastReal.getMonth(), lastReal.getDate() + add);
+          }
+        }
+
+        const box = document.createElement("div");
+        box.className = "weekBox";
+        const inp = document.createElement("input");
+        inp.type = "text";
+        inp.readOnly = true;
+
+        if(sundayDate){
+          const { available } = availableDaysUntil(sundayDate);
+          inp.value = available.toFixed(2);
+          inp.title = `Vacaciones DISPONIBLES al ${toISO(sundayDate)}`;
+        }else{
+          inp.value = "";
+        }
+
+        box.appendChild(inp);
+        grid.appendChild(box);
+      }
+
+      monthCard.appendChild(grid);
+      monthsEl.appendChild(monthCard);
+    }
+  }
+
+  function handleDayClick(iso){
+    const y = state.year;
+    const vac = getYearSet(state.vacation, y);
+    const dis = getYearSet(state.disabled, y);
+    const ph  = getYearSet(state.publicHolidays, y);
+    const worked = getYearSet(state.workedPH, y);
+
+    const mode = state.settings.mode;
+
+    if(mode === "vacation"){
+      // si está deshabilitado, no se puede marcar vacaciones
+      if(dis.has(iso)) return;
+
+      // si estaba como worked PH, lo quitamos (no tiene sentido doble)
+      worked.delete(iso);
+
+      if(vac.has(iso)) vac.delete(iso);
+      else vac.add(iso);
+    }
+
+    if(mode === "disabled"){
+      if(dis.has(iso)) dis.delete(iso);
+      else dis.add(iso);
+
+      // deshabilitado no cuenta como trabajado y tampoco como vacaciones
+      vac.delete(iso);
+      worked.delete(iso);
+    }
+
+    if(mode === "publicHoliday"){
+      if(ph.has(iso)){
+        ph.delete(iso);
+        worked.delete(iso);
+      }else{
+        ph.add(iso);
+      }
+    }
+
+    if(mode === "workedPH"){
+      if(!ph.has(iso)) return; // solo si es PH
+      // si trabajas un PH, no debe ser vacaciones
+      vac.delete(iso);
+
+      if(worked.has(iso)) worked.delete(iso);
+      else worked.add(iso);
+    }
+
+    saveState();
+    renderCalendar();
+    updateStats();
+  }
+
+  // ===========================
+  // Export ICS (Google Calendar)
+  // ===========================
+  function icsEscape(s){
+    return String(s)
+      .replace(/\\/g, "\\\\")
+      .replace(/\n/g, "\\n")
+      .replace(/,/g, "\\,")
+      .replace(/;/g, "\\;");
+  }
+  function formatICSDate(date){
+    const y = date.getFullYear();
+    const m = pad2(date.getMonth()+1);
+    const d = pad2(date.getDate());
+    return `${y}${m}${d}`;
+  }
+  function buildICS(events, calName="Calendar Export"){
+    const now = new Date();
+    const dtstamp = `${now.getUTCFullYear()}${pad2(now.getUTCMonth()+1)}${pad2(now.getUTCDate())}T${pad2(now.getUTCHours())}${pad2(now.getUTCMinutes())}${pad2(now.getUTCSeconds())}Z`;
+
+    const lines = [];
+    lines.push("BEGIN:VCALENDAR");
+    lines.push("VERSION:2.0");
+    lines.push("PRODID:-//VacacionesApp//ES//");
+    lines.push(`X-WR-CALNAME:${icsEscape(calName)}`);
+
+    for(const ev of events){
+      const uid = `${formatICSDate(ev.start)}-${Math.random().toString(16).slice(2)}@vacacionesapp`;
+      lines.push("BEGIN:VEVENT");
+      lines.push(`UID:${uid}`);
+      lines.push(`DTSTAMP:${dtstamp}`);
+      lines.push(`DTSTART;VALUE=DATE:${formatICSDate(ev.start)}`);
+      lines.push(`DTEND;VALUE=DATE:${formatICSDate(ev.endExclusive)}`);
+      lines.push(`SUMMARY:${icsEscape(ev.summary)}`);
+      lines.push("END:VEVENT");
+    }
+
+    lines.push("END:VCALENDAR");
+    return lines.join("\r\n");
+  }
+  function downloadText(filename, content, mime="text/plain"){
+    const blob = new Blob([content], {type: mime});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function exportAnnualLeaveICS(){
+    const y = state.year;
+    const vac = getYearSet(state.vacation, y);
+    const dis = getYearSet(state.disabled, y);
+    const ph  = getYearSet(state.publicHolidays, y);
+
+    const days = Array.from(vac)
+      .filter(iso => !dis.has(iso))
+      .filter(iso => !ph.has(iso)) // PH por defecto no consume AL
+      .sort();
+
+    const events = days.map(iso=>{
+      const start = parseISO(iso);
+      const end = new Date(start.getFullYear(), start.getMonth(), start.getDate()+1);
+      return { start, endExclusive:end, summary:"Annual Leave" };
+    });
+
+    // cumpleaños como evento
+    if(state.settings.enableBirthday === "yes"){
+      const bday = birthdayInYear(y);
+      if(bday){
+        events.push({
+          start: bday,
+          endExclusive: new Date(bday.getFullYear(), bday.getMonth(), bday.getDate()+1),
+          summary: "Birthday Leave (Bonus)"
+        });
+      }
+    }
+
+    const ics = buildICS(events, `Annual Leave ${y}`);
+    downloadText(`annual-leave-${y}.ics`, ics, "text/calendar");
+  }
+
+  function exportPublicHolidaysICS(){
+    const y = state.year;
+    const ph  = getYearSet(state.publicHolidays, y);
+    const days = Array.from(ph).sort();
+
+    const events = days.map(iso=>{
+      const start = parseISO(iso);
+      const end = new Date(start.getFullYear(), start.getMonth(), start.getDate()+1);
+      return { start, endExclusive:end, summary:"Public Holiday (IE)" };
+    });
+
+    const ics = buildICS(events, `Public Holidays Ireland ${y}`);
+    downloadText(`public-holidays-ie-${y}.ics`, ics, "text/calendar");
+  }
+
+  // ===========================
+  // UI bindings
+  // ===========================
+  const elYear = document.getElementById("year");
+  const elCutoff = document.getElementById("cutoff");
+  const elContractStart = document.getElementById("contractStart");
+  const elWeeklyHours = document.getElementById("weeklyHours");
+  const elWorkDaysPerWeek = document.getElementById("workDaysPerWeek");
+  const elDailyHours = document.getElementById("dailyHours");
+  const elFte = document.getElementById("fte");
+  const elAccrualRate = document.getElementById("accrualRate");
+  const elTargetDaysPerYear = document.getElementById("targetDaysPerYear");
+  const elAccrualPct = document.getElementById("accrualPct");
+  const elCarry = document.getElementById("carryoverDays");
+  const elBirthday = document.getElementById("birthday");
+  const elEnableBirthday = document.getElementById("enableBirthday");
+  const elMode = document.getElementById("mode");
+  const elCountWeekends = document.getElementById("countWeekends");
+
+  function initYears(){
+    const years = [2025,2026,2027,2028,2029,2030];
+    elYear.innerHTML = years.map(y=>`<option value="${y}">${y}</option>`).join("");
+  }
+
+  function recalcDailyHours(){
+    const weekly = Number(elWeeklyHours.value)||0;
+    const days = clamp(Number(elWorkDaysPerWeek.value)||5,1,7);
+    // si quieres que sea exactamente tu caso L-V:
+    // 38 / 5 = 7.6
+    const daily = days > 0 ? weekly / days : 0;
+    elDailyHours.value = (Math.round(daily*100)/100).toFixed(2);
+  }
+
+  function calcRatioFromTargetDays(){
+    // ratio aproximado = (targetDays * dailyHours) / yearlyWorkedHours
+    // yearlyWorkedHours ≈ weeklyHours * 52
+    const targetDays = Number(elTargetDaysPerYear.value)||0;
+    const weeklyHours = Number(elWeeklyHours.value)||0;
+    const dailyHours = Number(elDailyHours.value)||0;
+
+    const yearlyHours = weeklyHours * 52;
+    if(yearlyHours <= 0) return;
+
+    const ratio = (targetDays * dailyHours) / yearlyHours;
+    elAccrualRate.value = ratio.toFixed(4);
+  }
+
+  function applySettingsToUI(){
+    elYear.value = String(state.year);
+    elCutoff.value = state.settings.cutoff;
+    elContractStart.value = state.settings.contractStart;
+    elWeeklyHours.value = state.settings.weeklyHours;
+    elWorkDaysPerWeek.value = state.settings.workDaysPerWeek;
+    elDailyHours.value = state.settings.dailyHours;
+    elFte.value = state.settings.fte;
+    elAccrualRate.value = state.settings.accrualRate;
+    elTargetDaysPerYear.value = state.settings.targetDaysPerYear;
+    elAccrualPct.value = state.settings.accrualPct;
+    elCarry.value = state.settings.carryoverDays;
+    elBirthday.value = state.settings.birthday;
+    elEnableBirthday.value = state.settings.enableBirthday;
+    elMode.value = state.settings.mode;
+    elCountWeekends.value = state.settings.countWeekends;
+  }
+
+  function syncSettingsFromUI(){
+    state.year = Number(elYear.value) || 2026;
+    state.settings.cutoff = elCutoff.value || `${state.year}-01-01`;
+    state.settings.contractStart = elContractStart.value || `${state.year}-01-01`;
+
+    state.settings.weeklyHours = Number(elWeeklyHours.value) || 0;
+    state.settings.workDaysPerWeek = clamp(Number(elWorkDaysPerWeek.value)||5,1,7);
+    state.settings.dailyHours = Number(elDailyHours.value) || 0;
+
+    state.settings.fte = Number(elFte.value) || 0;
+    state.settings.accrualRate = Number(elAccrualRate.value) || 0;
+    state.settings.targetDaysPerYear = Number(elTargetDaysPerYear.value) || 0;
+    state.settings.accrualPct = Number(elAccrualPct.value) || 100;
+    state.settings.carryoverDays = Number(elCarry.value) || 0;
+
+    state.settings.birthday = elBirthday.value || "1999-01-01";
+    state.settings.enableBirthday = elEnableBirthday.value;
+
+    state.settings.mode = elMode.value;
+    state.settings.countWeekends = elCountWeekends.value;
+
+    ensurePublicHolidaysForYear(state.year);
+    saveState();
+  }
+
+  // Botones
+  document.getElementById("exportLeaveICS").addEventListener("click", exportAnnualLeaveICS);
+  document.getElementById("exportPHICS").addEventListener("click", exportPublicHolidaysICS);
+
+  document.getElementById("calcRatioBtn").addEventListener("click", ()=>{
+    recalcDailyHours();
+    calcRatioFromTargetDays();
+    syncSettingsFromUI();
+    renderCalendar();
+    updateStats();
+    alert("Ratio recalculado ✅");
+  });
+
+  document.getElementById("exportJSON").addEventListener("click", ()=>{
+    const pack = (m) => Object.fromEntries(
+      Object.entries(m).map(([y,set]) => [y, Array.from(set).sort()])
+    );
+    const payload = {
+      year: state.year,
+      settings: state.settings,
+      vacation: pack(state.vacation),
+      disabled: pack(state.disabled),
+      publicHolidays: pack(state.publicHolidays),
+      workedPH: pack(state.workedPH),
+    };
+    const json = JSON.stringify(payload, null, 2);
+    navigator.clipboard.writeText(json).then(()=>alert("JSON copiado ✅"))
+      .catch(()=>prompt("Copia el JSON:", json));
+  });
+
+  document.getElementById("importJSON").addEventListener("click", ()=>{
+    const raw = prompt("Pega aquí el JSON exportado:");
+    if(!raw) return;
+    try{
+      const parsed = JSON.parse(raw);
+      const unpack = (m) => {
+        const out = {};
+        for(const [y, arr] of Object.entries(m ?? {})){
+          out[y] = new Set(arr ?? []);
+        }
+        return out;
+      };
+
+      state.year = parsed.year ?? state.year;
+      state.settings = { ...state.settings, ...(parsed.settings ?? {}) };
+      state.vacation = unpack(parsed.vacation);
+      state.disabled = unpack(parsed.disabled);
+      state.publicHolidays = unpack(parsed.publicHolidays);
+      state.workedPH = unpack(parsed.workedPH);
+
+      ensurePublicHolidaysForYear(state.year);
+
+      saveState();
+      applySettingsToUI();
+      renderCalendar();
+      updateStats();
+      alert("Importado ✅");
+    }catch(e){
+      alert("JSON inválido ❌");
+    }
+  });
+
+  document.getElementById("resetBtn").addEventListener("click", ()=>{
+    if(!confirm("¿Seguro que quieres borrar todo?")) return;
+    localStorage.removeItem(STORAGE_KEY);
+    location.reload();
+  });
+
+  // Reacciones a inputs
+  [elYear, elCutoff, elContractStart, elWeeklyHours, elWorkDaysPerWeek, elDailyHours, elFte, elAccrualRate, elTargetDaysPerYear, elAccrualPct, elCarry, elBirthday, elEnableBirthday, elMode, elCountWeekends]
+    .forEach(el=>{
+      el.addEventListener("change", ()=>{
+        // si cambia weeklyHours o workDays, recalculamos dailyHours por defecto
+        if(el === elWeeklyHours || el === elWorkDaysPerWeek){
+          recalcDailyHours();
+        }
+        syncSettingsFromUI();
+        renderCalendar();
+        updateStats();
+      });
+      el.addEventListener("input", ()=>{
+        if(el === elWeeklyHours || el === elWorkDaysPerWeek){
+          recalcDailyHours();
+        }
+        syncSettingsFromUI();
+        updateStats();
+      });
+    });
+
+  // ===========================
+  // Init
+  // ===========================
+  initYears();
+  loadState();
+
+  // Defaults razonables (tu caso)
+  if(!state.settings.weeklyHours) state.settings.weeklyHours = 38;
+  if(!state.settings.workDaysPerWeek) state.settings.workDaysPerWeek = 5;
+  if(!state.settings.dailyHours) state.settings.dailyHours = 7.6;
+
+  ensurePublicHolidaysForYear(state.year);
+
+  applySettingsToUI();
+  renderCalendar();
+  updateStats();
+</script>
+</body>
+</html>
