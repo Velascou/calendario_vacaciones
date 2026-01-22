@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6aa9ff"/>
+      <stop offset="100%" stop-color="#1f7aff"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect x="10" y="14" width="108" height="104" rx="18" fill="#0f1730" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>
+
+  <!-- Top bar -->
+  <rect x="10" y="14" width="108" height="28" rx="18" fill="url(#g)"/>
+  <rect x="10" y="28" width="108" height="14" fill="url(#g)"/>
+
+  <!-- Rings -->
+  <rect x="32" y="10" width="10" height="20" rx="5" fill="#e8f0ff"/>
+  <rect x="86" y="10" width="10" height="20" rx="5" fill="#e8f0ff"/>
+
+  <!-- Grid dots -->
+  <g fill="rgba(232,240,255,0.75)">
+    <circle cx="38" cy="62" r="4"/>
+    <circle cx="58" cy="62" r="4"/>
+    <circle cx="78" cy="62" r="4"/>
+
+    <circle cx="38" cy="82" r="4"/>
+    <circle cx="58" cy="82" r="4"/>
+    <circle cx="78" cy="82" r="4"/>
+  </g>
+
+  <!-- Highlight (vacation day) -->
+  <circle cx="92" cy="82" r="7" fill="#40d18a"/>
+</svg>
